@@ -88,9 +88,6 @@ void draw_vehicle(int sx, int sy, int sw, int sh, float anim, int vid, VehicleTy
     DrawText(vid_str, cx - MeasureText(vid_str, 10) / 2, cy - 5, 10, WHITE);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// draw_slot  – renders one parking cell (free or occupied)
-// ─────────────────────────────────────────────────────────────────────────────
 void draw_slot(int sx, int sy, int sw, int sh, ParkingSlot *s)
 {
     Color bg = (s->state == SLOT_OCCUPIED) ? COL_OCC     : COL_FREE;
