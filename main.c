@@ -1,9 +1,7 @@
 #include "parking.h"
-#include "raylib.h"   // pulls in all UI/drawing functions
+#include "raylib.h"  
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ts  – return current wall-clock time as "HH:MM:SS"
-// ─────────────────────────────────────────────────────────────────────────────
+
 const char *ts(void)
 {
     static char buf[16];
@@ -14,9 +12,7 @@ const char *ts(void)
     return buf;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// push_event  – append a colour-coded message to the on-screen event ring
-// ─────────────────────────────────────────────────────────────────────────────
+
 void push_event(ParkingLot *lot, Color col, const char *fmt, ...)
 {
     pthread_mutex_lock(&lot->event_mutex);
@@ -33,9 +29,7 @@ void push_event(ParkingLot *lot, Color col, const char *fmt, ...)
     pthread_mutex_unlock(&lot->event_mutex);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// enqueue_log  – push a message onto the async file-logger queue
-// ─────────────────────────────────────────────────────────────────────────────
+
 void enqueue_log(ParkingLot *lot, const char *fmt, ...)
 {
     pthread_mutex_lock(&lot->log_mutex);
@@ -52,9 +46,7 @@ void enqueue_log(ParkingLot *lot, const char *fmt, ...)
     pthread_mutex_unlock(&lot->log_mutex);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// wait_for_gate  – block until entry or exit gate is signalled open
-// ─────────────────────────────────────────────────────────────────────────────
+
 void wait_for_gate(pthread_mutex_t *m, pthread_cond_t *c, int *flag)
 {
     pthread_mutex_lock(m);
@@ -62,9 +54,6 @@ void wait_for_gate(pthread_mutex_t *m, pthread_cond_t *c, int *flag)
     pthread_mutex_unlock(m);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// logger_thread  – background thread that drains the log queue to disk
-// ─────────────────────────────────────────────────────────────────────────────
 void *logger_thread(void *arg)
 {
     ParkingLot *lot = (ParkingLot *)arg;
@@ -94,9 +83,7 @@ void *logger_thread(void *arg)
     return NULL;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// vehicle_thread  – one thread per vehicle: enter → park → wait → exit
-// ─────────────────────────────────────────────────────────────────────────────
+
 void *vehicle_thread(void *arg)
 {
     VehicleArg *va   = (VehicleArg *)arg;
@@ -114,7 +101,7 @@ void *vehicle_thread(void *arg)
     int *target_free_ui     = (type == TYPE_BIKE)  ? &lot->free_bikes
                             : (type == TYPE_CAR)   ? &lot->free_cars : &lot->free_heavy;
 
-    // Acquire semaphore slot
+    
     sem_wait(target_sem);
     __sync_fetch_and_sub(target_free_ui, 1);
 
@@ -124,7 +111,7 @@ void *vehicle_thread(void *arg)
     lot->entry_pulse = 1.0f;
     usleep(GATE_OPEN_DELAY_US);
 
-    // Enter slot
+    
     pthread_mutex_lock(&lot->slots_mutex);
     lot->slots[idx].state         = SLOT_OCCUPIED;
     lot->slots[idx].vehicle_id    = vid;
@@ -140,7 +127,6 @@ void *vehicle_thread(void *arg)
     push_event(lot, COL_GREEN, "%s V%02d ASSIGNED  → Slot %02d", t_str, vid, sid);
     enqueue_log(lot, "[%s] %s V%02d ENTERED slot %02d", ts(), t_str, vid, sid);
 
-    // Wait indefinitely until the user signals removal via cond var
     pthread_mutex_lock(&lot->slots[idx].slot_mutex);
     while (lot->slots[idx].force_remove == 0)
         pthread_cond_wait(&lot->slots[idx].remove_cond, &lot->slots[idx].slot_mutex);
@@ -184,9 +170,7 @@ void *vehicle_thread(void *arg)
     return NULL;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// spawn_vehicle  – create a new VehicleArg and launch its thread
-// ─────────────────────────────────────────────────────────────────────────────
+
 void spawn_vehicle(ParkingLot *lot, VehicleType type, int slot_idx)
 {
     pthread_mutex_lock(&lot->stats_mutex);
@@ -204,9 +188,7 @@ void spawn_vehicle(ParkingLot *lot, VehicleType type, int slot_idx)
     pthread_create(&tid, NULL, vehicle_thread, arg);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// lot_init  – initialise every mutex, semaphore, and slot in the lot
-// ─────────────────────────────────────────────────────────────────────────────
+
 void lot_init(ParkingLot *lot)
 {
     for (int i = 0; i < TOTAL_SLOTS; i++) {
@@ -261,9 +243,7 @@ void lot_init(ParkingLot *lot)
     lot->ui_state = UI_IDLE;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// lot_destroy  – clean up every OS synchronisation primitive
-// ─────────────────────────────────────────────────────────────────────────────
+
 void lot_destroy(ParkingLot *lot)
 {
     for (int i = 0; i < TOTAL_SLOTS; i++) {
@@ -286,9 +266,7 @@ void lot_destroy(ParkingLot *lot)
     pthread_mutex_destroy(&lot->event_mutex);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// main  – application entry point: init → game loop → cleanup
-// ─────────────────────────────────────────────────────────────────────────────
+
 int main(void)
 {
     ParkingLot *lot = calloc(1, sizeof(ParkingLot));
@@ -308,7 +286,7 @@ int main(void)
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
 
-        // ── Handle mouse clicks on the grid ──────────────────────────────────
+        
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && lot->ui_state != UI_IDLE) {
             Vector2 mouse = GetMousePosition();
             pthread_mutex_lock(&lot->slots_mutex);
@@ -340,7 +318,7 @@ int main(void)
             pthread_mutex_unlock(&lot->slots_mutex);
         }
 
-        // ── Animate slot entry / exit ─────────────────────────────────────────
+        
         pthread_mutex_lock(&lot->slots_mutex);
         for (int i = 0; i < TOTAL_SLOTS; i++) {
             ParkingSlot *s = &lot->slots[i];
@@ -355,18 +333,18 @@ int main(void)
         }
         pthread_mutex_unlock(&lot->slots_mutex);
 
-        // ── Gate pulse decay ──────────────────────────────────────────────────
+        
         if (lot->entry_pulse > 0) lot->entry_pulse -= dt * 2.0f;
         if (lot->exit_pulse  > 0) lot->exit_pulse  -= dt * 2.0f;
         if (lot->entry_pulse < 0) lot->entry_pulse  = 0;
         if (lot->exit_pulse  < 0) lot->exit_pulse   = 0;
 
-        // ── Age event log entries ─────────────────────────────────────────────
+        
         pthread_mutex_lock(&lot->event_mutex);
         for (int i = 0; i < MAX_EVENTS; i++) lot->events[i].age += dt;
         pthread_mutex_unlock(&lot->event_mutex);
 
-        // ── Draw everything ───────────────────────────────────────────────────
+    
         BeginDrawing();
         ClearBackground(COL_BG);
 
@@ -375,12 +353,12 @@ int main(void)
         draw_log_panel(lot, font);
         draw_stats(lot, font);
 
-        DrawRectangle(0, 0, WIN_W, 8, COL_ACCENT);   // accent top bar
+        DrawRectangle(0, 0, WIN_W, 8, COL_ACCENT);  
 
         EndDrawing();
     }
 
-    // ── Shutdown ──────────────────────────────────────────────────────────────
+    
     pthread_mutex_lock(&lot->log_mutex);
     lot->log_shutdown = 1;
     pthread_cond_signal(&lot->log_not_empty);
