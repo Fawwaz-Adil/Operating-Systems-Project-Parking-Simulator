@@ -12,25 +12,25 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
-// ─── Parking Capacity ──────────────────────────────────────────────────────
+#define MAX_CARS            3
 #define NUM_BIKE_SLOTS      4
 #define NUM_CAR_SLOTS       6
 #define NUM_HEAVY_SLOTS     2
 #define TOTAL_SLOTS         (NUM_BIKE_SLOTS + NUM_CAR_SLOTS + NUM_HEAVY_SLOTS)
 
-// ─── System Config ─────────────────────────────────────────────────────────
+
 #define LOG_QUEUE_SIZE      128
 #define GATE_OPEN_DELAY_US  300000
 #define PARKING_FEE_PER_SEC 2.50
 #define MAX_LOG_DISPLAY     18
 #define MAX_EVENTS          256
 
-// ─── Window Config ─────────────────────────────────────────────────────────
+
 #define WIN_W   1100
 #define WIN_H   720
 #define FPS     60
 
-// ─── UI Layout Constants ───────────────────────────────────────────────────
+
 #define SIDEBAR_X    10
 #define SIDEBAR_Y    10
 #define SIDEBAR_W    260
@@ -48,7 +48,6 @@
 #define STATS_W      260
 #define STATS_H      700
 
-// ─── Color Palette ─────────────────────────────────────────────────────────
 #define COL_BG          CLITERAL(Color){ 15,  17,  26, 255}
 #define COL_PANEL       CLITERAL(Color){ 24,  27,  40, 255}
 #define COL_BORDER      CLITERAL(Color){ 55,  62,  90, 255}
@@ -66,12 +65,12 @@
 #define COL_WINDOW      CLITERAL(Color){180, 210, 255, 160}
 #define COL_TYRE        CLITERAL(Color){ 30,  30,  30, 255}
 
-// ─── Enums ─────────────────────────────────────────────────────────────────
+
 typedef enum { SLOT_FREE = 0, SLOT_RESERVED, SLOT_OCCUPIED } SlotState;
 typedef enum { TYPE_BIKE = 0, TYPE_CAR, TYPE_HEAVY }         VehicleType;
 typedef enum { UI_IDLE = 0, UI_ADD_BIKE, UI_ADD_CAR, UI_ADD_HEAVY, UI_REMOVE } UIActionState;
 
-// ─── Structs ───────────────────────────────────────────────────────────────
+
 typedef struct {
     int             slot_id;
     VehicleType     allowed_type;
@@ -140,7 +139,8 @@ typedef struct {
     int         target_slot;
 } VehicleArg;
 
-// ─── Core Logic Function Declarations ─────────────────────────────────────
+
+
 void  lot_init(ParkingLot *lot);
 void  lot_destroy(ParkingLot *lot);
 void  push_event(ParkingLot *lot, Color col, const char *fmt, ...);
@@ -151,7 +151,7 @@ void  wait_for_gate(pthread_mutex_t *m, pthread_cond_t *c, int *flag);
 void  spawn_vehicle(ParkingLot *lot, VehicleType type, int slot_idx);
 const char *ts(void);
 
-// ─── UI / Drawing Function Declarations ───────────────────────────────────
+
 void  draw_panel(Rectangle r, Color bg, Color border);
 void  draw_slot(int sx, int sy, int sw, int sh, ParkingSlot *s);
 void  draw_vehicle(int sx, int sy, int sw, int sh, float anim, int vid, VehicleType type);
@@ -162,4 +162,5 @@ void  draw_stats(ParkingLot *lot, Font font);
 Color lerp_color(Color a, Color b, float t);
 bool  gui_button(Rectangle r, const char *text, Color base_col);
 
-#endif // PARKING_H
+#endif 
+
