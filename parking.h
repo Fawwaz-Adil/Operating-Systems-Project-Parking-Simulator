@@ -11,14 +11,13 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <stdbool.h>
-
-/* ── Capacity ─────────────────────────────────────────────────────────────── */
+//Capacity
 #define NUM_BIKE_SLOTS      4
 #define NUM_CAR_SLOTS       6
 #define NUM_HEAVY_SLOTS     2
 #define TOTAL_SLOTS         (NUM_BIKE_SLOTS + NUM_CAR_SLOTS + NUM_HEAVY_SLOTS)
 
-/* ── Tuning ───────────────────────────────────────────────────────────────── */
+
 #define LOG_QUEUE_SIZE      128
 #define GATE_OPEN_DELAY_US  300000
 #define PARKING_FEE_PER_SEC 2.50
@@ -28,7 +27,7 @@
 #define PRIORITY_MIN        1
 #define PRIORITY_MAX        9
 
-/* ── Window / layout ─────────────────────────────────────────────────────── */
+// Window / layout
 #define WIN_W   1280
 #define WIN_H   760
 #define FPS     60
@@ -50,7 +49,7 @@
 #define STATS_W      340
 #define STATS_H      740
 
-/* ── Palette ──────────────────────────────────────────────────────────────── */
+// Palette
 #define COL_BG           CLITERAL(Color){ 15,  17,  26, 255}
 #define COL_PANEL        CLITERAL(Color){ 24,  27,  40, 255}
 #define COL_BORDER       CLITERAL(Color){ 55,  62,  90, 255}
