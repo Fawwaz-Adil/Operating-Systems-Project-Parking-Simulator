@@ -1,0 +1,187 @@
+================================================================
+  Smart Parking Allocation System using Semaphores and Mutexes
+  HOW TO RUN ON UBUNTU (Virtual Machine Setup Guide)
+================================================================
+
+Tested on: Ubuntu 24.04 LTS (inside VirtualBox)
+Built with: C, Raylib, POSIX Semaphores/Mutexes
+
+----------------------------------------------------------------
+PROJECT FILES
+----------------------------------------------------------------
+
+Make sure you have these three files in your project folder:
+
+  - main.c
+  - parking_ui.c
+  - parking.h
+
+NOTE: This project uses semaphore.h and pthread.h which are
+Linux-only libraries. It will NOT compile or run on Windows.
+Use Ubuntu (native or VM) to run this project.
+
+----------------------------------------------------------------
+STEP 1 - Install Required Dependencies
+----------------------------------------------------------------
+
+Open a terminal and run:
+
+  sudo apt-get install -y git cmake build-essential \
+    libgl1-mesa-dev libx11-dev libxrandr-dev libxi-dev \
+    libxcursor-dev libxinerama-dev libasound2-dev
+
+This installs the compilers, OpenGL, and X11 libraries that
+Raylib needs to build and run on Linux.
+
+----------------------------------------------------------------
+STEP 2 - Install Raylib from Source
+----------------------------------------------------------------
+
+Run each command one at a time and wait for each to finish:
+
+  cd ~
+  git clone --depth 1 https://github.com/raysan5/raylib.git
+  cd raylib
+  mkdir build && cd build
+  cmake .. -DBUILD_SHARED_LIBS=ON
+  make -j$(nproc)
+  sudo make install
+  sudo ldconfig
+
+What this does:
+  - Clones the latest Raylib source code from GitHub
+  - Compiles it as a shared library
+  - Installs it system-wide to /usr/local/lib and /usr/local/include
+  - ldconfig refreshes the system's library cache
+
+To verify Raylib installed correctly:
+
+  ls /usr/local/lib/libraylib*
+
+You should see files like libraylib.so, libraylib.so.6.0.0, etc.
+
+NOTE: If the git clone fails midway (connection reset), just
+run the clone command again. Use --depth 1 to keep it lightweight.
+
+----------------------------------------------------------------
+STEP 3 - Set Up the Project Folder
+----------------------------------------------------------------
+
+  cd ~/Desktop
+  mkdir osproject
+  cd osproject
+
+Now copy/paste your three project files (main.c, parking_ui.c,
+parking.h) into this osproject folder.
+
+Your folder should look like this:
+
+  osproject/
+  ├── main.c
+  ├── parking_ui.c
+  ├── parking.h
+  └── Makefile        <-- you will create this in the next step
+
+----------------------------------------------------------------
+STEP 4 - Create the Makefile
+----------------------------------------------------------------
+
+Inside the osproject folder, create a file named exactly
+"Makefile" (capital M, no extension):
+
+  nano Makefile
+
+Paste the following content into it:
+
+----------------------------------------------------------
+CC = gcc
+CFLAGS = -Wall -I/usr/local/include
+LDFLAGS = -L/usr/local/lib -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+
+TARGET = parking_system
+SRCS = main.c parking_ui.c
+
+all: $(TARGET)
+
+$(TARGET): $(SRCS) parking.h
+	$(CC) $(CFLAGS) $(SRCS) -o $(TARGET) $(LDFLAGS)
+
+clean:
+	rm -f $(TARGET)
+----------------------------------------------------------
+
+IMPORTANT: The lines starting with $(CC) and rm -f must be
+indented with a TAB character, not spaces. In nano, pressing
+the Tab key inserts a real tab automatically.
+
+Save with Ctrl+O, press Enter, then exit with Ctrl+X.
+
+What the flags mean:
+  -lraylib   -> links the Raylib graphics library
+  -lGL       -> links OpenGL (used by Raylib for rendering)
+  -lm        -> links the math library
+  -lpthread  -> links POSIX threads (for mutexes)
+  -lrt       -> links real-time extensions (for semaphores)
+  -lX11      -> links the X11 windowing system
+
+----------------------------------------------------------------
+STEP 5 - Compile the Project
+----------------------------------------------------------------
+
+Make sure you are inside the osproject folder:
+
+  cd ~/Desktop/osproject
+  make
+
+You should see the compiler command print out and finish with
+no errors. Warnings are okay and can be ignored.
+
+A file called "parking_system" will appear in your folder.
+
+----------------------------------------------------------------
+STEP 6 - Run the Project
+----------------------------------------------------------------
+
+  ./parking_system
+
+The Raylib GUI window for the Smart Parking System will open.
+
+----------------------------------------------------------------
+RUNNING AGAIN LATER (e.g., during viva)
+----------------------------------------------------------------
+
+Raylib stays installed permanently, so you do NOT need to
+reinstall anything. Just do:
+
+  cd ~/Desktop/osproject
+  ./parking_system
+
+That's it.
+
+----------------------------------------------------------------
+TROUBLESHOOTING
+----------------------------------------------------------------
+
+Problem: "cannot find -lraylib" during make
+Fix:
+  sudo ldconfig
+  make
+
+Problem: "libraylib.so not found" when running the program
+Fix:
+  export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+  ./parking_system
+
+Problem: Black screen or OpenGL error in VirtualBox
+Fix:
+  Go to VirtualBox -> Settings -> Display
+  Set Video Memory to 128 MB
+  Enable 3D Acceleration
+
+Problem: make says "Nothing to be done for 'all'"
+Fix: Already compiled. Just run ./parking_system directly.
+
+----------------------------------------------------------------
+OS: Ubuntu 24.04 LTS | Raylib: Latest (cloned from GitHub)
+Course: Operating Systems | Topic: IPC, Semaphores, Mutexes
+================================================================
