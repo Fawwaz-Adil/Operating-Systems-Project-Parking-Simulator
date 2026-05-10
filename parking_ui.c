@@ -459,23 +459,23 @@ void draw_stats(ParkingLot *lot, Font font)
     DrawText(rev, x, y, 22, COL_GREEN); y += 34;
     DrawLine(x, y, STATS_X + STATS_W - 16, y, COL_BORDER); y += 14;
 
-    /* Vehicles served */
+    //Vehicles served
     DrawText("VEHICLES SERVED", x, y, 11, COL_MUTED); y += 18;
     char sc[12]; snprintf(sc, sizeof(sc), "%d", lot->vehicles_served);
     DrawText(sc, x, y, 22, COL_ACCENT); y += 34;
     DrawLine(x, y, STATS_X + STATS_W - 16, y, COL_BORDER); y += 14;
 
-    /* Occupancy */
+    // Occupancy
     DrawText("OCCUPANCY", x, y, 11, COL_MUTED); y += 18;
     char oc[24];
     snprintf(oc, sizeof(oc), "%d / %d", lot->occupied_count, TOTAL_SLOTS);
     DrawText(oc, x, y, 22, COL_AMBER); y += 34;
     DrawLine(x, y, STATS_X + STATS_W - 16, y, COL_BORDER); y += 14;
 
-    /* Per-zone availability */
+    //Per-zone availability
     DrawText("SLOT AVAILABILITY", x, y, 11, COL_MUTED); y += 18;
 
-    auto_draw_zone_bar:;  /* label trick not needed; just inline */
+    auto_draw_zone_bar:;
 
     
     {
